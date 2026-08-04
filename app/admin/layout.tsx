@@ -1,22 +1,19 @@
-import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
 interface AdminLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/");
+    redirect("/api/auth/signin?callbackUrl=/admin/products");
   }
 
-  const isAdmin = session.user.roles.includes("admin");
-
-  if (!isAdmin) {
-    redirect("/unauthorized");
+  if (!session.roles.includes("admin")) {
+    redirect("/products");
   }
 
   return children;

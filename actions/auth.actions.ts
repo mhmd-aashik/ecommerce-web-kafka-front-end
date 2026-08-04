@@ -4,7 +4,7 @@ import { signIn, signOut } from "@/auth";
 
 export async function login() {
   await signIn("keycloak", {
-    redirectTo: "/",
+    redirectTo: "/products",
   });
 }
 

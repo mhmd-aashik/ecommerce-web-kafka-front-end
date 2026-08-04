@@ -1,30 +1,25 @@
 import Link from "next/link";
-import { CartLink } from "@/components/cart-link";
-import { AuthButtons } from "@/components/auth-buttons";
 import { auth } from "@/auth";
+import { AuthControls } from "@/components/auth-controls";
+import { CartNavigation } from "@/components/cart-navigation";
 
 export async function Navbar() {
   const session = await auth();
-
-  const isAdmin = session?.user.roles.includes("admin") ?? false;
+  const isAdmin = session?.roles.includes("admin") ?? false;
 
   return (
     <header className="border-b bg-white">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-6 p-4">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-5 p-4">
         <Link href="/" className="text-xl font-bold">
           Kafka Shop
         </Link>
 
         <div className="flex items-center gap-5">
-          <Link href="/products">Products</Link>
-
-          {session?.user && <Link href="/orders">Orders</Link>}
+          <CartNavigation />
 
           {isAdmin && <Link href="/admin/products">Admin</Link>}
 
-          <CartLink />
-
-          <AuthButtons />
+          <AuthControls />
         </div>
       </nav>
     </header>

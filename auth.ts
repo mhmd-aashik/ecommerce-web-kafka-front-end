@@ -1,32 +1,10 @@
 import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 
-interface KeycloakAccessToken {
-  sub?: string;
-  preferred_username?: string;
+interface KeycloakProfile {
   realm_access?: {
     roles?: string[];
   };
-}
-
-function decodeJwtPayload(token: string): KeycloakAccessToken {
-  try {
-    const payload = token.split(".")[1];
-
-    if (!payload) {
-      return {};
-    }
-
-    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
-
-    const decodedPayload = Buffer.from(normalizedPayload, "base64").toString(
-      "utf8",
-    );
-
-    return JSON.parse(decodedPayload) as KeycloakAccessToken;
-  } catch {
-    return {};
-  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -43,34 +21,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, account, profile }) {
-      if (account?.access_token) {
-        const decodedToken = decodeJwtPayload(account.access_token);
-
+    jwt({ token, account, profile }) {
+      if (account) {
         token.accessToken = account.access_token;
         token.idToken = account.id_token;
-        token.userId = decodedToken.sub ?? profile?.sub;
-        token.username = decodedToken.preferred_username;
-        token.roles = decodedToken.realm_access?.roles ?? [];
+      }
+
+      const keycloakProfile = profile as KeycloakProfile | undefined;
+
+      if (keycloakProfile?.realm_access?.roles) {
+        token.roles = keycloakProfile.realm_access.roles;
       }
 
       return token;
     },
 
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.userId as string;
-        session.user.username = token.username as string;
-        session.user.roles = token.roles as string[];
-      }
+    session({ session, token }) {
+      session.accessToken =
+        typeof token.accessToken === "string" ? token.accessToken : undefined;
 
-      session.accessToken = token.accessToken as string;
+      session.roles = Array.isArray(token.roles)
+        ? token.roles.filter((role): role is string => typeof role === "string")
+        : [];
 
       return session;
     },
-  },
-
-  pages: {
-    error: "/auth/error",
   },
 });
