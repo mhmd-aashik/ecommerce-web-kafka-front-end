@@ -1,16 +1,16 @@
-"use client";
-
 import Link from "next/link";
-import { useCartStore } from "@/stores/cart.store";
+import { CartLink } from "@/components/cart-link";
+import { AuthButtons } from "@/components/auth-buttons";
+import { auth } from "@/auth";
 
-export function Navbar() {
-  const totalItems = useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0),
-  );
+export async function Navbar() {
+  const session = await auth();
+
+  const isAdmin = session?.user.roles.includes("admin") ?? false;
 
   return (
     <header className="border-b bg-white">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between p-4">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-6 p-4">
         <Link href="/" className="text-xl font-bold">
           Kafka Shop
         </Link>
@@ -18,13 +18,13 @@ export function Navbar() {
         <div className="flex items-center gap-5">
           <Link href="/products">Products</Link>
 
-          <Link href="/orders">Orders</Link>
+          {session?.user && <Link href="/orders">Orders</Link>}
 
-          <Link href="/admin/products">Admin</Link>
+          {isAdmin && <Link href="/admin/products">Admin</Link>}
 
-          <Link href="/cart" className="font-medium">
-            Cart ({totalItems})
-          </Link>
+          <CartLink />
+
+          <AuthButtons />
         </div>
       </nav>
     </header>
