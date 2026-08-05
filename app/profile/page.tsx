@@ -38,6 +38,13 @@ export default async function ProfilePage() {
         </p>
 
         <p className="mt-2">
+          <strong>Full Name:</strong>{" "}
+          {result.user.firstName || result.user.lastName
+            ? `${result.user.firstName ?? ""} ${result.user.lastName ?? ""}`.trim()
+            : "Not provided"}
+        </p>
+
+        <p className="mt-2">
           <strong>Email:</strong> {result.user.email ?? "Not provided"}
         </p>
 

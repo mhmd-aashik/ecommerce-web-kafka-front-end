@@ -11,6 +11,7 @@ export function CartNavigation() {
   return (
     <>
       <Link href="/products">Products</Link>
+
       <Link href="/orders">Orders</Link>
 
       <Link href="/cart" className="font-medium">
