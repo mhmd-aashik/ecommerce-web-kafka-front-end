@@ -1,10 +1,32 @@
 import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 
-interface KeycloakProfile {
+interface KeycloakAccessTokenPayload {
   realm_access?: {
     roles?: string[];
   };
+}
+
+// Keycloak only adds realm_access.roles to the access token, so the OIDC profile
+// (built from the ID token) cannot be used as the source of roles.
+function readRealmRoles(accessToken: string): string[] {
+  const payload = accessToken.split(".")[1];
+
+  if (!payload) {
+    return [];
+  }
+
+  try {
+    const claims = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as KeycloakAccessTokenPayload;
+
+    return (claims.realm_access?.roles ?? []).filter(
+      (role): role is string => typeof role === "string",
+    );
+  } catch {
+    return [];
+  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -21,16 +43,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
-    jwt({ token, account, profile }) {
+    jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
         token.idToken = account.id_token;
-      }
 
-      const keycloakProfile = profile as KeycloakProfile | undefined;
-
-      if (keycloakProfile?.realm_access?.roles) {
-        token.roles = keycloakProfile.realm_access.roles;
+        token.roles = account.access_token
+          ? readRealmRoles(account.access_token)
+          : [];
       }
 
       return token;
