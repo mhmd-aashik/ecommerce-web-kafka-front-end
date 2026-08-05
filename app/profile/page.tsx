@@ -18,7 +18,7 @@ interface ProfileResponse {
 export default async function ProfilePage() {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user || session.error === "RefreshAccessTokenError") {
     redirect("/api/auth/signin?callbackUrl=/profile");
   }
 
