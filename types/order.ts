@@ -24,7 +24,7 @@ export interface ApiOrder {
   customerEmail: string;
   items: ApiOrderItem[];
   totalInFils: number;
-  status: "PENDING_PAYMENT" | "PAID" | "PAYMENT_FAILED";
+  status: OrderStatus;
   paymentId?: string;
   paymentFailureReason?: string;
   createdAt: string;

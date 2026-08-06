@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { apiRequest } from "@/lib/api/api-client";
+import type { ApiOrder } from "@/types/order";
 
 interface CreateOrderInput {
   items: Array<{
@@ -12,15 +12,13 @@ interface CreateOrderInput {
   }>;
 }
 
-export async function createOrder(input: CreateOrderInput) {
-  const order = await apiRequest<{
-    id: string;
-  }>("/orders", {
+export async function createOrder(input: CreateOrderInput): Promise<ApiOrder> {
+  const order = await apiRequest<ApiOrder>("/orders", {
     method: "POST",
     body: JSON.stringify(input),
   });
 
   revalidatePath("/orders");
 
-  redirect(`/orders/${order.id}`);
+  return order;
 }
