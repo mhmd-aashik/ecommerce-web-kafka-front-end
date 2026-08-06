@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { RefreshOrderButton } from "@/components/refresh-order-button";
 import { apiRequest } from "@/lib/api/api-client";
 import type { ApiOrder } from "@/types/order";
 
@@ -23,10 +24,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Order #{order.id.slice(0, 8)}</h1>
 
-        <OrderStatus status={order.status} />
+        <div className="flex items-center gap-3">
+          <OrderStatus status={order.status} />
+          <RefreshOrderButton status={order.status} />
+        </div>
       </div>
 
       <section className="mt-6 rounded-lg bg-white p-6 shadow-sm">
