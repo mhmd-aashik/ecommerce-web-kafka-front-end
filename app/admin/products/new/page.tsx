@@ -2,7 +2,8 @@
 
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProductStore } from "@/stores/product.store";
+import { createProduct } from "@/actions/product.actions";
+// import { useProductStore } from "@/stores/product.store";
 
 interface ProductFormState {
   name: string;
@@ -21,7 +22,7 @@ const initialFormState: ProductFormState = {
 export default function CreateProductPage() {
   const router = useRouter();
 
-  const addProduct = useProductStore((state) => state.addProduct);
+  // const addProduct = useProductStore((state) => state.addProduct);
 
   const [form, setForm] = useState<ProductFormState>(initialFormState);
 
@@ -38,7 +39,7 @@ export default function CreateProductPage() {
     }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
@@ -65,11 +66,17 @@ export default function CreateProductPage() {
       return;
     }
 
-    addProduct({
+    // addProduct({
+    //   name: form.name.trim(),
+    //   description: form.description.trim(),
+    //   price,
+    //   stock,
+    // });
+    await createProduct({
       name: form.name.trim(),
       description: form.description.trim(),
-      price,
-      stock,
+      priceInFils: Math.round(Number(form.price) * 100),
+      stock: Number(form.stock),
     });
 
     router.push("/admin/products");
