@@ -1,13 +1,14 @@
 "use client";
 
 import { create } from "zustand";
+
 import type { Product } from "@/types/product";
 import { products } from "@/data/products";
 
 export interface CreateProductInput {
   name: string;
   description: string;
-  price: number;
+  priceInFils: number;
   stock: number;
 }
 
@@ -18,7 +19,7 @@ interface ProductState {
 }
 
 export const useProductStore = create<ProductState>((set) => ({
-  products: products,
+  products,
 
   addProduct: (input) => {
     const product: Product = {

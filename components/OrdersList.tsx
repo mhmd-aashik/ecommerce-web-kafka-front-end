@@ -68,7 +68,7 @@ export function OrdersList() {
                   </div>
 
                   <p className="font-semibold">
-                    AED {(item.price * item.quantity).toFixed(2)}
+                    AED {((item.priceInFils * item.quantity) / 100).toFixed(2)}
                   </p>
                 </div>
               ))}

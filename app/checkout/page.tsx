@@ -12,8 +12,8 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const addOrder = useOrderStore((state) => state.addOrder);
 
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const totalInFils = items.reduce(
+    (sum, item) => sum + item.priceInFils * item.quantity,
     0,
   );
 
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
       id: crypto.randomUUID(),
       userId: "user-1",
       items,
-      total,
+      total: totalInFils / 100,
       status: "PENDING_PAYMENT",
       createdAt: new Date().toISOString(),
     };
@@ -82,13 +82,17 @@ export default function CheckoutPage() {
                 {item.name} × {item.quantity}
               </span>
 
-              <span>AED {(item.price * item.quantity).toFixed(2)}</span>
+              <span>
+                AED {((item.priceInFils * item.quantity) / 100).toFixed(2)}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="mt-5 flex items-center justify-between">
-          <span className="text-xl font-bold">AED {total.toFixed(2)}</span>
+          <span className="text-xl font-bold">
+            AED {(totalInFils / 100).toFixed(2)}
+          </span>
 
           <button
             type="button"

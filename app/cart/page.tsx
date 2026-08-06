@@ -1,14 +1,15 @@
 "use client";
 
 import { useCartStore } from "@/stores/cart.store";
+import { formatAedFromFils } from "@/types/product";
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
 
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const totalInFils = items.reduce(
+    (sum, item) => sum + item.priceInFils * item.quantity,
     0,
   );
 
@@ -27,7 +28,7 @@ export default function CartPage() {
             >
               <div>
                 <h2 className="font-semibold">{item.name}</h2>
-                <p>AED {item.price.toFixed(2)}</p>
+                <p>AED {formatAedFromFils(item.priceInFils)}</p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -58,7 +59,7 @@ export default function CartPage() {
           ))}
 
           <div className="text-right text-xl font-bold">
-            Total: AED {total.toFixed(2)}
+            Total: AED {formatAedFromFils(totalInFils)}
           </div>
         </div>
       )}

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
-import { products } from "@/data/products";
+
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { apiRequest } from "@/lib/api/api-client";
+import type { Product } from "@/types/product";
+import { formatAedFromFils } from "@/types/product";
 
 interface ProductDetailsPageProps {
   params: Promise<{
@@ -13,9 +16,13 @@ export default async function ProductDetailsPage({
 }: ProductDetailsPageProps) {
   const { id } = await params;
 
-  const product = products.find((item) => item.id === id);
+  let product: Product;
 
-  if (!product) {
+  try {
+    product = await apiRequest<Product>(`/products/${id}`, {
+      authenticated: false,
+    });
+  } catch {
     notFound();
   }
 
@@ -34,7 +41,7 @@ export default async function ProductDetailsPage({
           <p className="mt-4 text-gray-600">{product.description}</p>
 
           <p className="mt-6 text-2xl font-bold">
-            AED {product.price.toFixed(2)}
+            AED {formatAedFromFils(product.priceInFils)}
           </p>
 
           <p className="mt-2 text-sm text-gray-500">

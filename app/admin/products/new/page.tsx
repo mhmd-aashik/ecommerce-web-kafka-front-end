@@ -1,9 +1,9 @@
 "use client";
 
-import { type ChangeEvent, type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { type ChangeEvent, type FormEvent, useState, useTransition } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+
 import { createProduct } from "@/actions/product.actions";
-// import { useProductStore } from "@/stores/product.store";
 
 interface ProductFormState {
   name: string;
@@ -20,13 +20,9 @@ const initialFormState: ProductFormState = {
 };
 
 export default function CreateProductPage() {
-  const router = useRouter();
-
-  // const addProduct = useProductStore((state) => state.addProduct);
-
   const [form, setForm] = useState<ProductFormState>(initialFormState);
-
   const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   function handleChange(
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -39,7 +35,7 @@ export default function CreateProductPage() {
     }));
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
@@ -66,20 +62,24 @@ export default function CreateProductPage() {
       return;
     }
 
-    // addProduct({
-    //   name: form.name.trim(),
-    //   description: form.description.trim(),
-    //   price,
-    //   stock,
-    // });
-    await createProduct({
-      name: form.name.trim(),
-      description: form.description.trim(),
-      priceInFils: Math.round(Number(form.price) * 100),
-      stock: Number(form.stock),
-    });
+    startTransition(async () => {
+      try {
+        await createProduct({
+          name: form.name.trim(),
+          description: form.description.trim(),
+          priceInFils: Math.round(price * 100),
+          stock,
+        });
+      } catch (err) {
+        if (isRedirectError(err)) {
+          throw err;
+        }
 
-    router.push("/admin/products");
+        setError(
+          err instanceof Error ? err.message : "Failed to create product.",
+        );
+      }
+    });
   }
 
   return (
@@ -112,6 +112,7 @@ export default function CreateProductPage() {
             onChange={handleChange}
             className="w-full rounded border p-3"
             placeholder="Mechanical Keyboard"
+            disabled={isPending}
           />
         </div>
 
@@ -127,13 +128,14 @@ export default function CreateProductPage() {
             onChange={handleChange}
             className="min-h-32 w-full rounded border p-3"
             placeholder="Describe the product"
+            disabled={isPending}
           />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor="price" className="mb-2 block font-medium">
-              Price
+              Price (AED)
             </label>
 
             <input
@@ -146,6 +148,7 @@ export default function CreateProductPage() {
               onChange={handleChange}
               className="w-full rounded border p-3"
               placeholder="250"
+              disabled={isPending}
             />
           </div>
 
@@ -164,12 +167,17 @@ export default function CreateProductPage() {
               onChange={handleChange}
               className="w-full rounded border p-3"
               placeholder="10"
+              disabled={isPending}
             />
           </div>
         </div>
 
-        <button type="submit" className="rounded bg-black px-5 py-3 text-white">
-          Save product
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded bg-black px-5 py-3 text-white disabled:opacity-60"
+        >
+          {isPending ? "Saving..." : "Save product"}
         </button>
       </form>
     </main>
